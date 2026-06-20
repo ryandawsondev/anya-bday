@@ -4,6 +4,7 @@ import { BIRTHDAY_DATE } from './config'
 import CountdownGate from './components/ui/CountdownGate'
 import IntroScreen from './components/ui/IntroScreen'
 import MemoryPanel from './components/ui/MemoryPanel'
+import CustomCursor from './components/ui/CustomCursor'
 import ConstellationScene from './components/scene/ConstellationScene'
 import { useConstellationStore } from './state/useConstellationStore'
 
@@ -61,6 +62,7 @@ export default function App() {
 
   return (
     <>
+      <CustomCursor />
       <DevNav scene={scene} setScene={goToScene} />
 
       {scene === 'countdown' && (
