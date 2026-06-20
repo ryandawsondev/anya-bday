@@ -7,21 +7,32 @@ import ConstellationLines from './ConstellationLines'
 import CameraRig from './CameraRig'
 import { memories } from '../../data/memories'
 import { useConstellationStore } from '../../state/useConstellationStore'
+import { useConstellationDrag } from '../../hooks/useConstellationDrag'
 
 function SceneClickCatcher() {
   const setSelected = useConstellationStore(s => s.setSelected)
   return (
-    <mesh
-      position={[0, 0, -20]}
-      onClick={() => setSelected(null)}
-      visible={false}
-    >
+    <mesh position={[0, 0, -20]} onClick={() => setSelected(null)} visible={false}>
       <planeGeometry args={[200, 200]} />
     </mesh>
   )
 }
 
+function ConstellationGroup() {
+  const rotY = useConstellationStore(s => s.constellationRotY)
+  return (
+    <group rotation={[0, rotY, 0]}>
+      <ConstellationLines />
+      {memories.map(m => (
+        <MemoryStar key={m.id} memory={m} />
+      ))}
+    </group>
+  )
+}
+
 export default function ConstellationScene() {
+  useConstellationDrag()
+
   return (
     <Canvas
       camera={{ position: [0, 0, 12], fov: 60, near: 0.1, far: 300 }}
@@ -33,10 +44,7 @@ export default function ConstellationScene() {
 
       <Suspense fallback={null}>
         <Starfield />
-        <ConstellationLines />
-        {memories.map(m => (
-          <MemoryStar key={m.id} memory={m} />
-        ))}
+        <ConstellationGroup />
       </Suspense>
 
       <SceneClickCatcher />

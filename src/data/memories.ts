@@ -13,7 +13,7 @@ export interface Memory {
 export const memories: Memory[] = [
   {
     id: '1',
-    position: [0, 2.0, 0.1],
+    position: [0, 2.0, 1.2],
     title: 'Memory Title',
     date: 'Date',
     note: 'A note about this memory goes here.',
@@ -21,7 +21,7 @@ export const memories: Memory[] = [
   },
   {
     id: '2',
-    position: [1.3, 2.8, 0.3],
+    position: [1.3, 2.8, -1.5],
     title: 'Memory Title',
     date: 'Date',
     note: 'A note about this memory goes here.',
@@ -29,7 +29,7 @@ export const memories: Memory[] = [
   },
   {
     id: '3',
-    position: [2.5, 1.2, -0.2],
+    position: [2.5, 1.2, 1.8],
     title: 'Memory Title',
     date: 'Date',
     note: 'A note about this memory goes here.',
@@ -37,7 +37,7 @@ export const memories: Memory[] = [
   },
   {
     id: '4',
-    position: [1.7, 0, 0.4],
+    position: [1.7, 0, -1.2],
     title: 'Memory Title',
     date: 'Date',
     note: 'A note about this memory goes here.',
@@ -45,7 +45,7 @@ export const memories: Memory[] = [
   },
   {
     id: '5',
-    position: [0, -1.6, 0],
+    position: [0, -1.6, 1.0],
     title: 'Memory Title',
     date: 'Date',
     note: 'A note about this memory goes here.',
@@ -53,7 +53,7 @@ export const memories: Memory[] = [
   },
   {
     id: '6',
-    position: [-1.7, 0, -0.3],
+    position: [-1.7, 0, -1.8],
     title: 'Memory Title',
     date: 'Date',
     note: 'A note about this memory goes here.',
@@ -61,7 +61,7 @@ export const memories: Memory[] = [
   },
   {
     id: '7',
-    position: [-2.5, 1.2, 0.2],
+    position: [-2.5, 1.2, 0.9],
     title: 'Memory Title',
     date: 'Date',
     note: 'A note about this memory goes here.',
@@ -69,7 +69,7 @@ export const memories: Memory[] = [
   },
   {
     id: '8',
-    position: [-1.3, 2.8, -0.1],
+    position: [-1.3, 2.8, -1.4],
     title: 'Memory Title',
     date: 'Date',
     note: 'A note about this memory goes here.',
