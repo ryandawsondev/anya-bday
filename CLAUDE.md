@@ -1,6 +1,6 @@
 # Constellation — Birthday Gift Web App
 
-A personal gift: a 3D space scene where stars form a heart shape, each representing a memory. Clicking a star flies the camera toward it and reveals a photo + note. Built for a specific person (Anya), ships June 25, 2026.
+A personal gift: a 3D space with multiple galaxies to explore. Each galaxy contains a themed constellation of memory-stars. From the galaxy map, clicking a galaxy triggers a Star Wars-style hyperspace warp animation, then drops you into that galaxy's constellation. Clicking a memory-star flies the camera to it and reveals a photo + note. Built for a specific person (Anya), ships June 25, 2026.
 
 **No backend. All content is static, bundled at build time. Deploy target: GitHub Pages.**
 
@@ -30,12 +30,16 @@ pnpm run deploy      # build + push to gh-pages branch (GitHub Pages deploy)
 ```
 src/
   components/
-    scene/        # R3F components: ConstellationScene, Starfield, MemoryStar, CameraRig, ConstellationLines
-    ui/           # DOM components: CountdownGate, IntroScreen, MemoryPanel
+    scene/        # R3F components: ConstellationScene, Starfield, MemoryStar, CameraRig,
+                  #   ConstellationLines, GalaxyMap, GalaxyCluster, HyperspaceEffect
+    ui/           # DOM components: CountdownGate, IntroScreen, MemoryPanel, GalaxyLabel, BackButton
   data/
-    memories.ts   # Memory type + static data array — edit this to add real content
+    galaxies.ts   # Galaxy type + array — each galaxy has id, name, theme color, map position,
+                  #   constellation connections, and memories array
+    memories.ts   # Memory type — imported by galaxies.ts; no longer a top-level array
   state/
-    useConstellationStore.ts   # zustand store: selectedId, hoveredId
+    useConstellationStore.ts   # zustand store: viewMode ('map'|'galaxy'), currentGalaxyId,
+                               #   selectedId, hoveredId, warpPhase ('idle'|'spooling'|'warping'|'dropping')
   assets/
     memories/     # photo files — compress before adding (WebP preferred, <200KB each)
   config.ts       # BIRTHDAY_DATE constant — single source of truth for countdown gate
@@ -43,6 +47,23 @@ src/
   main.tsx
   styles.css
 ```
+
+## Scene Architecture
+
+Two top-level views, both rendered inside the same R3F `<Canvas>`:
+
+- **Galaxy map** (`viewMode === 'map'`): floating `GalaxyCluster` meshes in the void; idle camera drift active; clicking a cluster fires `startWarp(galaxyId)`
+- **Galaxy interior** (`viewMode === 'galaxy'`): existing constellation + memory-star mechanic, scoped to `currentGalaxyId`; `BackButton` fires `startWarp(null)` to return
+
+### Hyperspace warp (`HyperspaceEffect`)
+
+Three-phase `useFrame` animation, total ~2 seconds:
+
+1. **Spool-up** (0–0.5s): background stars elongate into streaks; camera FOV widens from 60 → 90
+2. **Warp** (0.5–1.5s): streak particles fill screen; `MotionBlur` postprocessing effect active; FOV at 90
+3. **Drop** (1.5–2s): streaks shrink back; scene crossfades to destination; FOV returns to 60
+
+`warpPhase` in the store drives which postprocessing effects are active. `MotionBlur` is mounted/unmounted based on phase to avoid cost when idle.
 
 ## Code Conventions
 

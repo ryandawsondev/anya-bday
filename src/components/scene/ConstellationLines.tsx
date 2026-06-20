@@ -1,16 +1,21 @@
 import { useMemo } from 'react'
 import * as THREE from 'three'
-import { memories, CONSTELLATION_CONNECTIONS } from '../../data/memories'
+import type { Memory } from '../../data/memories'
 
-export default function ConstellationLines() {
+interface Props {
+  memories: Memory[]
+  connections: [number, number][]
+}
+
+export default function ConstellationLines({ memories, connections }: Props) {
   const geometry = useMemo(() => {
     const points: THREE.Vector3[] = []
-    for (const [a, b] of CONSTELLATION_CONNECTIONS) {
+    for (const [a, b] of connections) {
       points.push(new THREE.Vector3(...memories[a].position))
       points.push(new THREE.Vector3(...memories[b].position))
     }
     return new THREE.BufferGeometry().setFromPoints(points)
-  }, [])
+  }, [memories, connections])
 
   return (
     <lineSegments geometry={geometry}>

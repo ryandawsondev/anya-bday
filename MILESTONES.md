@@ -17,7 +17,11 @@ Work through in order. Update status column immediately after each milestone is 
 | 11 | Fly-to-star camera animation — smooth camera transition on star selection | Done |
 | 12 | Memory reveal panel — photo/title/note UI component, animated in with `motion` | Done |
 | 13 | Intro screen — title/entry screen before the main scene | Done |
-| 14 | Content population — real photos and written memories swapped in for placeholders | Not Started |
-| 15 | Mobile pass — touch interaction, layout fixes, particle count scaled down if frame rate suffers | Not Started |
-| 16 | Performance pass — image compression, asset loading check, frame rate verified | Not Started |
-| 17 | Deployment — `vite.config.ts` base path set, `gh-pages` deploy script added, Pages enabled in repo settings, link tested end to end | Not Started |
+| 14 | Galaxy data model — `Galaxy` type + `galaxies.ts` with 3–5 themed galaxies; each galaxy owns its memory array, constellation positions/connections, and a display name | Done |
+| 15 | Galaxy map scene — `GalaxyMap` and `GalaxyCluster` components; floating glowing galaxy clusters in the void; hover label (`GalaxyLabel`); click triggers transition | Done |
+| 16 | Hyperspace warp animation — `HyperspaceEffect` component; streak particles + FOV punch via `useFrame`; `MotionBlur` postprocessing effect active only during warp phase; 3-phase: spool-up → warp → drop | Done |
+| 17 | Scene transition system — `viewMode: 'map' \| 'galaxy'` + `currentGalaxyId` in zustand store; wire galaxy click → warp → constellation view; `BackButton` UI returns to galaxy map via reverse warp | Done |
+| 18 | Content population — real photos and written memories added across all galaxies; photos compressed to WebP <200KB each | Not Started |
+| 19 | Mobile pass — touch interaction, layout fixes, particle count scaled down if frame rate suffers | Not Started |
+| 20 | Performance pass — image compression verified, asset loading checked, frame rate confirmed across galaxy map and constellation views | Not Started |
+| 21 | Deployment — `vite.config.ts` base path set, `gh-pages` deploy script confirmed, Pages enabled in repo settings, live link tested end to end through galaxy map → warp → constellation → memory panel | Not Started |

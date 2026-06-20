@@ -5,7 +5,9 @@ import Starfield from './Starfield'
 import MemoryStar from './MemoryStar'
 import ConstellationLines from './ConstellationLines'
 import CameraRig from './CameraRig'
-import { memories } from '../../data/memories'
+import GalaxyMap from './GalaxyMap'
+import HyperspaceEffect from './HyperspaceEffect'
+import { galaxies } from '../../data/galaxies'
 import { useConstellationStore } from '../../state/useConstellationStore'
 import { useConstellationDrag } from '../../hooks/useConstellationDrag'
 import { useScrollZoom } from '../../hooks/useScrollZoom'
@@ -22,10 +24,13 @@ function SceneClickCatcher() {
 function ConstellationGroup() {
   const rotX = useConstellationStore(s => s.constellationRotX)
   const rotY = useConstellationStore(s => s.constellationRotY)
+  const currentGalaxyId = useConstellationStore(s => s.currentGalaxyId)
+  const galaxy = galaxies.find(g => g.id === currentGalaxyId) ?? galaxies[0]
+
   return (
     <group rotation={[rotX, rotY, 0]}>
-      <ConstellationLines />
-      {memories.map(m => (
+      <ConstellationLines memories={galaxy.memories} connections={galaxy.connections} />
+      {galaxy.memories.map(m => (
         <MemoryStar key={m.id} memory={m} />
       ))}
     </group>
@@ -35,6 +40,8 @@ function ConstellationGroup() {
 export default function ConstellationScene() {
   useConstellationDrag()
   useScrollZoom()
+
+  const viewMode = useConstellationStore(s => s.viewMode)
 
   return (
     <Canvas
@@ -47,11 +54,18 @@ export default function ConstellationScene() {
 
       <Suspense fallback={null}>
         <Starfield />
-        <ConstellationGroup />
+        {viewMode === 'map' ? (
+          <GalaxyMap />
+        ) : (
+          <>
+            <ConstellationGroup />
+            <SceneClickCatcher />
+            <CameraRig />
+          </>
+        )}
       </Suspense>
 
-      <SceneClickCatcher />
-      <CameraRig />
+      <HyperspaceEffect />
 
       <EffectComposer>
         <Bloom

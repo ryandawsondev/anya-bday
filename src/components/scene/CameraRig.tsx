@@ -1,19 +1,20 @@
 import { useRef } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
-import { memories } from '../../data/memories'
+import { galaxies } from '../../data/galaxies'
 import { useConstellationStore } from '../../state/useConstellationStore'
 
-const _camTarget  = new THREE.Vector3()
-const _lookTarget = new THREE.Vector3()
+const _camTarget   = new THREE.Vector3()
+const _lookTarget  = new THREE.Vector3()
 const _currentLook = new THREE.Vector3(0, 0, 0)
-const _euler = new THREE.Euler(0, 0, 0, 'XYZ')
+const _euler       = new THREE.Euler(0, 0, 0, 'XYZ')
 
 const damp = (lambda: number, delta: number) => 1 - Math.exp(-lambda * delta)
 
 export default function CameraRig() {
   const { camera } = useThree()
   const selectedId        = useConstellationStore(s => s.selectedId)
+  const currentGalaxyId   = useConstellationStore(s => s.currentGalaxyId)
   const constellationRotX = useConstellationStore(s => s.constellationRotX)
   const constellationRotY = useConstellationStore(s => s.constellationRotY)
   const cameraZ           = useConstellationStore(s => s.cameraZ)
@@ -23,10 +24,10 @@ export default function CameraRig() {
     timeRef.current += delta
 
     if (selectedId) {
-      const memory = memories.find(m => m.id === selectedId)
+      const galaxy = galaxies.find(g => g.id === currentGalaxyId)
+      const memory = galaxy?.memories.find(m => m.id === selectedId)
       if (!memory) return
 
-      // Transform star's local position into world space using current constellation rotation
       _euler.set(constellationRotX, constellationRotY, 0)
       _lookTarget.set(...memory.position).applyEuler(_euler)
       _camTarget.copy(_lookTarget)

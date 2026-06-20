@@ -5,7 +5,8 @@
       "Bash(pnpm build *)",
       "Bash(pnpm install *)",
       "Bash(timeout 8 pnpm dev)",
-      "Bash(node *)"
+      "Bash(node *)",
+      "Bash(pnpm exec *)"
     ]
   }
 }
