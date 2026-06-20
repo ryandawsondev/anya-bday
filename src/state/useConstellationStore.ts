@@ -25,6 +25,9 @@ interface ConstellationStore {
   setHoveredGalaxyId: (id: string | null) => void
   setWarpPhase: (phase: WarpPhase) => void
   startWarp: (targetGalaxyId: string | null) => void
+
+  visitedIds: string[]
+  markVisited: (id: string) => void
 }
 
 export const useConstellationStore = create<ConstellationStore>(set => ({
@@ -49,4 +52,9 @@ export const useConstellationStore = create<ConstellationStore>(set => ({
   setHoveredGalaxyId: id => set({ hoveredGalaxyId: id }),
   setWarpPhase: phase => set({ warpPhase: phase }),
   startWarp: targetGalaxyId => set({ warpPhase: 'spooling', warpTargetGalaxyId: targetGalaxyId }),
+
+  visitedIds: [],
+  markVisited: id => set(s =>
+    s.visitedIds.includes(id) ? {} : { visitedIds: [...s.visitedIds, id] }
+  ),
 }))

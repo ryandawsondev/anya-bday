@@ -3,6 +3,7 @@ import { useFrame, type ThreeEvent } from '@react-three/fiber'
 import * as THREE from 'three'
 import type { Memory } from '../../data/memories'
 import { useConstellationStore } from '../../state/useConstellationStore'
+import { playStarHover, playStarClick } from '../../audio/soundEffects'
 
 // Shared textures — created once for all stars
 const CORE_TEX = (() => {
@@ -34,19 +35,22 @@ const HALO_TEX = (() => {
 })()
 
 // HDR colors for bloom (toneMapped=false lets values exceed 1.0)
-const CORE_COLOR  = new THREE.Color(8, 7, 3)
-const HOVER_COLOR = new THREE.Color(10, 8.5, 3.5)
-const SEL_COLOR   = new THREE.Color(12, 10, 4)
-const HALO_COLOR  = new THREE.Color(5, 4, 1.5)
+const CORE_COLOR    = new THREE.Color(8, 7, 3)
+const HOVER_COLOR   = new THREE.Color(10, 8.5, 3.5)
+const SEL_COLOR     = new THREE.Color(12, 10, 4)
+const HALO_COLOR    = new THREE.Color(5, 4, 1.5)
+const VISITED_COLOR = new THREE.Color(3.5, 5.5, 8)
+const VISITED_HALO  = new THREE.Color(2, 3.5, 5.5)
 
 interface Props { memory: Memory }
 
 export default function MemoryStar({ memory }: Props) {
   const coreRef = useRef<THREE.Sprite>(null)
   const haloRef = useRef<THREE.Sprite>(null)
-  const { selectedId, hoveredId, setSelected, setHovered } = useConstellationStore()
+  const { selectedId, hoveredId, visitedIds, setSelected, setHovered, markVisited } = useConstellationStore()
   const isSelected = selectedId === memory.id
   const isHovered  = hoveredId  === memory.id
+  const isVisited  = visitedIds.includes(memory.id)
   const pulseOffset = useMemo(() => Math.random() * Math.PI * 2, [])
 
   const [coreMat] = useMemo(() => [
@@ -67,17 +71,19 @@ export default function MemoryStar({ memory }: Props) {
     const t = clock.getElapsedTime()
     const pulse = 1 + Math.sin(t * 1.4 + pulseOffset) * 0.07
 
-    const targetCore = isSelected ? 0.52 : isHovered ? 0.40 : 0.26 * pulse
-    const targetHalo = isSelected ? 1.40 : isHovered ? 1.05 : 0.72 * pulse
+    const baseScale = isVisited ? 0.20 : 0.26
+    const targetCore = isSelected ? 0.52 : isHovered ? 0.40 : baseScale * pulse
+    const targetHalo = isSelected ? 1.40 : isHovered ? 1.05 : (isVisited ? 0.55 : 0.72) * pulse
 
     const cx = coreRef.current.scale.x
     const hx = haloRef.current.scale.x
     coreRef.current.scale.setScalar(THREE.MathUtils.lerp(cx, targetCore, 0.12))
     haloRef.current.scale.setScalar(THREE.MathUtils.lerp(hx, targetHalo, 0.10))
 
-    coreMat.color.copy(isSelected ? SEL_COLOR : isHovered ? HOVER_COLOR : CORE_COLOR)
-    haloMat.color.copy(HALO_COLOR)
-    haloMat.opacity = isSelected ? 0.9 : isHovered ? 0.75 : 0.55
+    const baseCore = isVisited ? VISITED_COLOR : CORE_COLOR
+    coreMat.color.copy(isSelected ? SEL_COLOR : isHovered ? HOVER_COLOR : baseCore)
+    haloMat.color.copy(isVisited ? VISITED_HALO : HALO_COLOR)
+    haloMat.opacity = isSelected ? 0.9 : isHovered ? 0.75 : (isVisited ? 0.35 : 0.55)
   })
 
   return (
@@ -86,10 +92,13 @@ export default function MemoryStar({ memory }: Props) {
       <mesh
         onClick={(e: ThreeEvent<MouseEvent>) => {
           e.stopPropagation()
+          playStarClick()
+          markVisited(memory.id)
           setSelected(isSelected ? null : memory.id)
         }}
         onPointerOver={(e: ThreeEvent<PointerEvent>) => {
           e.stopPropagation()
+          playStarHover()
           setHovered(memory.id)
         }}
         onPointerOut={() => setHovered(null)}

@@ -1,14 +1,19 @@
-import { useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion, useSpring } from 'motion/react'
 import { useConstellationStore } from '../../state/useConstellationStore'
 
-// Only show on devices with a fine pointer (mouse). Touch = skip.
 const hasFinePointer =
   typeof window !== 'undefined' && window.matchMedia('(pointer: fine)').matches
+
+interface Spark { id: number; x: number; y: number; dx: number }
+
+let _sparkId = 0
 
 export default function CustomCursor() {
   const hoveredId = useConstellationStore((s) => s.hoveredId)
   const selectedId = useConstellationStore((s) => s.selectedId)
+  const [sparks, setSparks] = useState<Spark[]>([])
+  const lastSpawnRef = useRef(0)
 
   const dotX = useSpring(-200, { stiffness: 1200, damping: 60 })
   const dotY = useSpring(-200, { stiffness: 1200, damping: 60 })
@@ -22,6 +27,20 @@ export default function CustomCursor() {
       dotY.set(e.clientY)
       ringX.set(e.clientX)
       ringY.set(e.clientY)
+
+      const now = Date.now()
+      if (now - lastSpawnRef.current > 35) {
+        lastSpawnRef.current = now
+        const id = ++_sparkId
+        const spark: Spark = {
+          id,
+          x: e.clientX,
+          y: e.clientY,
+          dx: (Math.random() - 0.5) * 16,
+        }
+        setSparks(prev => [...prev.slice(-16), spark])
+        setTimeout(() => setSparks(prev => prev.filter(s => s.id !== id)), 900)
+      }
     }
     window.addEventListener('mousemove', onMove)
     return () => window.removeEventListener('mousemove', onMove)
@@ -33,6 +52,29 @@ export default function CustomCursor() {
 
   return (
     <>
+      {/* Sparkle trail */}
+      {sparks.map(spark => (
+        <motion.div
+          key={spark.id}
+          initial={{ opacity: 0.9, scale: 1, x: spark.x + spark.dx, y: spark.y }}
+          animate={{ opacity: 0, scale: 0.1, x: spark.x + spark.dx * 2.5, y: spark.y - 18 - Math.random() * 14 }}
+          transition={{ duration: 0.85, ease: 'easeOut' }}
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: 5,
+            height: 5,
+            borderRadius: '50%',
+            background: 'rgba(180, 215, 255, 1)',
+            boxShadow: '0 0 6px 2px rgba(150, 200, 255, 0.7)',
+            pointerEvents: 'none',
+            zIndex: 9997,
+            transform: 'translate(-50%, -50%)',
+          }}
+        />
+      ))}
+
       {/* Trailing ring */}
       <motion.div
         style={{

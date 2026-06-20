@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from 'motion/react'
 import * as THREE from 'three'
 import type { Galaxy } from '../../data/galaxies'
 import { useConstellationStore } from '../../state/useConstellationStore'
+import { playWarpStart } from '../../audio/soundEffects'
 
 const _scaleTarget = new THREE.Vector3()
 
@@ -15,19 +16,28 @@ interface Props {
 export default function GalaxyCluster({ galaxy }: Props) {
   const coreRef = useRef<THREE.Mesh>(null)
   const hoveredGalaxyId = useConstellationStore(s => s.hoveredGalaxyId)
+  const visitedIds = useConstellationStore(s => s.visitedIds)
   const setHoveredGalaxyId = useConstellationStore(s => s.setHoveredGalaxyId)
   const startWarp = useConstellationStore(s => s.startWarp)
 
   const isHovered = hoveredGalaxyId === galaxy.id
+  const isComplete = galaxy.memories.length > 0 && galaxy.memories.every(m => visitedIds.includes(m.id))
 
   const hdrColor = useMemo(() => {
     return new THREE.Color(galaxy.themeColor).multiplyScalar(4)
   }, [galaxy.themeColor])
 
-  useFrame((_, delta) => {
+  const hdrColorComplete = useMemo(() => {
+    return new THREE.Color(galaxy.themeColor).multiplyScalar(7)
+  }, [galaxy.themeColor])
+
+  useFrame(({ clock }, delta) => {
     if (!coreRef.current) return
-    _scaleTarget.setScalar(isHovered ? 1.4 : 1.0)
+    const pulse = isComplete ? 1.0 + Math.sin(clock.getElapsedTime() * 2.2) * 0.18 : 1.0
+    const baseScale = isComplete ? 1.15 * pulse : 1.0
+    _scaleTarget.setScalar(isHovered ? 1.4 : baseScale)
     coreRef.current.scale.lerp(_scaleTarget, 1 - Math.exp(-8 * delta))
+    ;(coreRef.current.material as THREE.MeshBasicMaterial).color.copy(isComplete ? hdrColorComplete : hdrColor)
   })
 
   return (
@@ -41,7 +51,7 @@ export default function GalaxyCluster({ galaxy }: Props) {
 
       {/* Invisible hit target */}
       <mesh
-        onClick={(e) => { e.stopPropagation(); startWarp(galaxy.id) }}
+        onClick={(e) => { e.stopPropagation(); playWarpStart(); startWarp(galaxy.id) }}
         onPointerEnter={(e) => { e.stopPropagation(); setHoveredGalaxyId(galaxy.id); document.body.style.cursor = 'pointer' }}
         onPointerLeave={() => { setHoveredGalaxyId(null); document.body.style.cursor = '' }}
       >

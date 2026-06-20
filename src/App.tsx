@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { AnimatePresence } from 'motion/react'
 import { BIRTHDAY_DATE } from './config'
+import { galaxies } from './data/galaxies'
 import CountdownGate from './components/ui/CountdownGate'
 import IntroScreen from './components/ui/IntroScreen'
 import MemoryPanel from './components/ui/MemoryPanel'
@@ -10,12 +11,14 @@ import ResetButton from './components/ui/ResetButton'
 import BackButton from './components/ui/BackButton'
 import CinematicText from './components/ui/CinematicText'
 import VolumeControl from './components/ui/VolumeControl'
+import YouAreHereLabel from './components/ui/YouAreHereLabel'
+import EpilogueScreen from './components/ui/EpilogueScreen'
 import { useConstellationStore } from './state/useConstellationStore'
 import { useAmbientAudio } from './hooks/useAmbientAudio'
 
 const isPastBirthday = () => new Date() >= BIRTHDAY_DATE
 
-type Scene = 'countdown' | 'intro' | 'cinematic' | 'constellation'
+type Scene = 'countdown' | 'intro' | 'cinematic' | 'constellation' | 'epilogue'
 
 function DevNav({ scene, setScene }: { scene: Scene; setScene: (s: Scene) => void }) {
   if (!import.meta.env.DEV) return null
@@ -69,15 +72,30 @@ function DevNav({ scene, setScene }: { scene: Scene; setScene: (s: Scene) => voi
       {btn('cinematic', 'Cinematic')}
       {btn('constellation', 'Map', 'map')}
       {btn('constellation', 'Galaxy', 'galaxy')}
+      {btn('epilogue', 'Epilogue')}
     </div>
   )
 }
 
+function allGalaxiesComplete(visitedIds: string[]): boolean {
+  return galaxies.every(g => g.memories.length > 0 && g.memories.every(m => visitedIds.includes(m.id)))
+}
+
 export default function App() {
   const [scene, setScene] = useState<Scene>(isPastBirthday() ? 'intro' : 'countdown')
+  const [epilogueSeen, setEpilogueSeen] = useState(false)
   const selectedId = useConstellationStore(s => s.selectedId)
   const viewMode   = useConstellationStore(s => s.viewMode)
+  const warpPhase  = useConstellationStore(s => s.warpPhase)
+  const visitedIds = useConstellationStore(s => s.visitedIds)
   const { play: playAudio, toggle: toggleAudio, isMuted, volume, setVolume } = useAmbientAudio()
+
+  useEffect(() => {
+    if (!epilogueSeen && scene === 'constellation' && warpPhase === 'idle' && viewMode === 'map' && allGalaxiesComplete(visitedIds)) {
+      const t = setTimeout(() => { setEpilogueSeen(true); setScene('epilogue') }, 400)
+      return () => clearTimeout(t)
+    }
+  }, [warpPhase, viewMode, scene, visitedIds, epilogueSeen])
 
   return (
     <>
@@ -105,7 +123,14 @@ export default function App() {
         }} />
       )}
 
-      {scene === 'constellation' && (
+      {scene === 'epilogue' && (
+        <EpilogueScreen onClose={() => {
+          useConstellationStore.getState().setViewMode('map')
+          setScene('constellation')
+        }} />
+      )}
+
+      {(scene === 'constellation' || scene === 'epilogue') && (
         <div style={{ width: '100vw', height: '100dvh', position: 'relative' }}>
           <ConstellationScene />
           {viewMode === 'galaxy' && <BackButton />}
@@ -116,6 +141,7 @@ export default function App() {
             onToggle={toggleAudio}
             onVolumeChange={setVolume}
           />
+          <YouAreHereLabel />
           <AnimatePresence>
             {selectedId && <MemoryPanel key={selectedId} />}
           </AnimatePresence>

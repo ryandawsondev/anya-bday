@@ -7,6 +7,7 @@ import ConstellationLines from './ConstellationLines'
 import CameraRig from './CameraRig'
 import GalaxyMap from './GalaxyMap'
 import HyperspaceEffect from './HyperspaceEffect'
+import ShootingStars from './ShootingStars'
 import { galaxies } from '../../data/galaxies'
 import { useConstellationStore } from '../../state/useConstellationStore'
 import { useConstellationDrag } from '../../hooks/useConstellationDrag'
@@ -54,6 +55,7 @@ export default function ConstellationScene() {
 
       <Suspense fallback={null}>
         <Starfield />
+        <ShootingStars />
         {viewMode === 'map' ? (
           <GalaxyMap />
         ) : (
