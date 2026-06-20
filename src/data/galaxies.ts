@@ -14,7 +14,7 @@ export interface Galaxy {
 }
 
 function placeholder(id: string, position: [number, number, number]): Memory {
-  return { id, position, title: 'Memory', date: '', note: '', photoSrc: '' }
+  return { id, position, title: 'Memory', date: '', note: '', photos: [] }
 }
 
 // Adventures — compass rose

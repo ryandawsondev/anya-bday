@@ -4,7 +4,7 @@ export interface Memory {
   title: string
   date?: string
   note: string
-  photoSrc: string
+  photos: string[]
 }
 
 const positions: [number, number, number][] = [
@@ -18,10 +18,10 @@ const positions: [number, number, number][] = [
 export const memories: Memory[] = positions.map(([x, y, z], i) => ({
   id: String(i + 1),
   position: [x, y, z],
-  title: 'Memory',
-  date: '',
-  note: '',
-  photoSrc: '',
+  title: i === 0 ? 'Test Memory' : 'Memory',
+  date: i === 0 ? 'June 30, 2024' : '',
+  note: i === 0 ? 'This is a test note so you can see the typewriter effect working. Each character types out one by one when you open a memory.' : '',
+  photos: i === 0 ? ['https://picsum.photos/seed/anya/460/260'] : [],
 }))
 
 export const CONSTELLATION_CONNECTIONS: [number, number][] = [

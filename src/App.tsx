@@ -8,7 +8,9 @@ import CustomCursor from './components/ui/CustomCursor'
 import ConstellationScene from './components/scene/ConstellationScene'
 import ResetButton from './components/ui/ResetButton'
 import BackButton from './components/ui/BackButton'
+import VolumeControl from './components/ui/VolumeControl'
 import { useConstellationStore } from './state/useConstellationStore'
+import { useAmbientAudio } from './hooks/useAmbientAudio'
 
 const isPastBirthday = () => new Date() >= BIRTHDAY_DATE
 
@@ -73,6 +75,7 @@ export default function App() {
   const [scene, setScene] = useState<Scene>(isPastBirthday() ? 'intro' : 'countdown')
   const selectedId = useConstellationStore(s => s.selectedId)
   const viewMode   = useConstellationStore(s => s.viewMode)
+  const { play: playAudio, toggle: toggleAudio, isMuted, volume, setVolume } = useAmbientAudio()
 
   return (
     <>
@@ -88,6 +91,7 @@ export default function App() {
 
       {scene === 'intro' && (
         <IntroScreen onEnter={() => {
+          playAudio()
           useConstellationStore.getState().setViewMode('map')
           setScene('constellation')
         }} />
@@ -98,6 +102,12 @@ export default function App() {
           <ConstellationScene />
           {viewMode === 'galaxy' && <BackButton />}
           {viewMode === 'galaxy' && <ResetButton />}
+          <VolumeControl
+            isMuted={isMuted}
+            volume={volume}
+            onToggle={toggleAudio}
+            onVolumeChange={setVolume}
+          />
           <AnimatePresence>
             {selectedId && <MemoryPanel key={selectedId} />}
           </AnimatePresence>
