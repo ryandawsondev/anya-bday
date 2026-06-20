@@ -8,6 +8,7 @@ import CameraRig from './CameraRig'
 import { memories } from '../../data/memories'
 import { useConstellationStore } from '../../state/useConstellationStore'
 import { useConstellationDrag } from '../../hooks/useConstellationDrag'
+import { useScrollZoom } from '../../hooks/useScrollZoom'
 
 function SceneClickCatcher() {
   const setSelected = useConstellationStore(s => s.setSelected)
@@ -33,10 +34,11 @@ function ConstellationGroup() {
 
 export default function ConstellationScene() {
   useConstellationDrag()
+  useScrollZoom()
 
   return (
     <Canvas
-      camera={{ position: [0, 0, 12], fov: 60, near: 0.1, far: 300 }}
+      camera={{ position: [0, 0, 12], fov: 75, near: 0.1, far: 300 }}
       gl={{ antialias: true, alpha: false }}
       style={{ width: '100%', height: '100%' }}
       dpr={[1, 2]}

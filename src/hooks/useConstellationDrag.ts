@@ -25,6 +25,10 @@ export function useConstellationDrag() {
       startY.current = e.clientY
       lastX.current = e.clientX
       lastY.current = e.clientY
+      // sync refs with store in case of external reset
+      const state = useConstellationStore.getState()
+      rotXRef.current = state.constellationRotX
+      rotYRef.current = state.constellationRotY
     }
     const onMove = (e: MouseEvent) => {
       if (!isDown.current) return

@@ -6,6 +6,7 @@ import IntroScreen from './components/ui/IntroScreen'
 import MemoryPanel from './components/ui/MemoryPanel'
 import CustomCursor from './components/ui/CustomCursor'
 import ConstellationScene from './components/scene/ConstellationScene'
+import ResetButton from './components/ui/ResetButton'
 import { useConstellationStore } from './state/useConstellationStore'
 
 const isPastBirthday = () => new Date() >= BIRTHDAY_DATE
@@ -79,6 +80,7 @@ export default function App() {
       {scene === 'constellation' && (
         <div style={{ width: '100vw', height: '100dvh', position: 'relative' }}>
           <ConstellationScene />
+          <ResetButton />
           <AnimatePresence>
             {selectedId && <MemoryPanel key={selectedId} />}
           </AnimatePresence>

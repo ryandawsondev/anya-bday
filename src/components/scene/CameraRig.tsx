@@ -16,6 +16,7 @@ export default function CameraRig() {
   const selectedId        = useConstellationStore(s => s.selectedId)
   const constellationRotX = useConstellationStore(s => s.constellationRotX)
   const constellationRotY = useConstellationStore(s => s.constellationRotY)
+  const cameraZ           = useConstellationStore(s => s.cameraZ)
   const timeRef = useRef(0)
 
   useFrame((_, delta) => {
@@ -38,7 +39,7 @@ export default function CameraRig() {
       _camTarget.set(
         Math.sin(t * 0.14) * 0.4,
         Math.cos(t * 0.09) * 0.3,
-        12 + Math.sin(t * 0.07) * 0.4,
+        cameraZ + Math.sin(t * 0.07) * 0.4,
       )
       camera.position.lerp(_camTarget, damp(1.5, delta))
 

@@ -4,7 +4,8 @@
       "Bash(echo \"EXIT:$?\")",
       "Bash(pnpm build *)",
       "Bash(pnpm install *)",
-      "Bash(timeout 8 pnpm dev)"
+      "Bash(timeout 8 pnpm dev)",
+      "Bash(node *)"
     ]
   }
 }
