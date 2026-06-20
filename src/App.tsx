@@ -8,13 +8,14 @@ import CustomCursor from './components/ui/CustomCursor'
 import ConstellationScene from './components/scene/ConstellationScene'
 import ResetButton from './components/ui/ResetButton'
 import BackButton from './components/ui/BackButton'
+import CinematicText from './components/ui/CinematicText'
 import VolumeControl from './components/ui/VolumeControl'
 import { useConstellationStore } from './state/useConstellationStore'
 import { useAmbientAudio } from './hooks/useAmbientAudio'
 
 const isPastBirthday = () => new Date() >= BIRTHDAY_DATE
 
-type Scene = 'countdown' | 'intro' | 'constellation'
+type Scene = 'countdown' | 'intro' | 'cinematic' | 'constellation'
 
 function DevNav({ scene, setScene }: { scene: Scene; setScene: (s: Scene) => void }) {
   if (!import.meta.env.DEV) return null
@@ -65,6 +66,7 @@ function DevNav({ scene, setScene }: { scene: Scene; setScene: (s: Scene) => voi
       <span style={{ fontSize: '10px', color: '#555', letterSpacing: '0.1em' }}>DEV</span>
       {btn('countdown', 'Countdown')}
       {btn('intro', 'Intro')}
+      {btn('cinematic', 'Cinematic')}
       {btn('constellation', 'Map', 'map')}
       {btn('constellation', 'Galaxy', 'galaxy')}
     </div>
@@ -92,6 +94,12 @@ export default function App() {
       {scene === 'intro' && (
         <IntroScreen onEnter={() => {
           playAudio()
+          setScene('cinematic')
+        }} />
+      )}
+
+      {scene === 'cinematic' && (
+        <CinematicText onComplete={() => {
           useConstellationStore.getState().setViewMode('map')
           setScene('constellation')
         }} />
