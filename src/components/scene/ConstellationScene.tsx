@@ -19,9 +19,10 @@ function SceneClickCatcher() {
 }
 
 function ConstellationGroup() {
+  const rotX = useConstellationStore(s => s.constellationRotX)
   const rotY = useConstellationStore(s => s.constellationRotY)
   return (
-    <group rotation={[0, rotY, 0]}>
+    <group rotation={[rotX, rotY, 0]}>
       <ConstellationLines />
       {memories.map(m => (
         <MemoryStar key={m.id} memory={m} />

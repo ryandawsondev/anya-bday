@@ -1,40 +1,61 @@
 import { useEffect, useRef } from 'react'
 import { useConstellationStore } from '../state/useConstellationStore'
 
+const X_CLAMP = Math.PI * 0.45
+const DRAG_THRESHOLD = 4
+
 export function useConstellationDrag() {
   const setRotY = useConstellationStore(s => s.setConstellationRotY)
-  const rotRef = useRef(0)
+  const setRotX = useConstellationStore(s => s.setConstellationRotX)
+  const rotXRef = useRef(0)
+  const rotYRef = useRef(0)
+  const isDown = useRef(false)
   const isDragging = useRef(false)
+  const startX = useRef(0)
+  const startY = useRef(0)
   const lastX = useRef(0)
+  const lastY = useRef(0)
 
   useEffect(() => {
     const onDown = (e: MouseEvent) => {
-      if (e.button === 2) {
-        isDragging.current = true
-        lastX.current = e.clientX
-      }
+      if (e.button !== 0) return
+      isDown.current = true
+      isDragging.current = false
+      startX.current = e.clientX
+      startY.current = e.clientY
+      lastX.current = e.clientX
+      lastY.current = e.clientY
     }
     const onMove = (e: MouseEvent) => {
-      if (!isDragging.current) return
+      if (!isDown.current) return
+      if (!isDragging.current) {
+        const dx = Math.abs(e.clientX - startX.current)
+        const dy = Math.abs(e.clientY - startY.current)
+        if (dx < DRAG_THRESHOLD && dy < DRAG_THRESHOLD) return
+        isDragging.current = true
+      }
       const dx = e.clientX - lastX.current
+      const dy = e.clientY - lastY.current
       lastX.current = e.clientX
-      rotRef.current += dx * 0.007
-      setRotY(rotRef.current)
+      lastY.current = e.clientY
+      rotYRef.current += dx * 0.007
+      rotXRef.current = Math.max(-X_CLAMP, Math.min(X_CLAMP, rotXRef.current + dy * 0.007))
+      setRotY(rotYRef.current)
+      setRotX(rotXRef.current)
     }
     const onUp = (e: MouseEvent) => {
-      if (e.button === 2) isDragging.current = false
+      if (e.button !== 0) return
+      isDown.current = false
+      isDragging.current = false
     }
-    const suppressContext = (e: Event) => e.preventDefault()
 
     window.addEventListener('mousedown', onDown)
     window.addEventListener('mousemove', onMove)
     window.addEventListener('mouseup', onUp)
-    window.addEventListener('contextmenu', suppressContext)
     return () => {
       window.removeEventListener('mousedown', onDown)
       window.removeEventListener('mousemove', onMove)
       window.removeEventListener('mouseup', onUp)
-      window.removeEventListener('contextmenu', suppressContext)
     }
-  }, [setRotY])
+  }, [setRotX, setRotY])
 }

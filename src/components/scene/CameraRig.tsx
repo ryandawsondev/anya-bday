@@ -7,13 +7,14 @@ import { useConstellationStore } from '../../state/useConstellationStore'
 const _camTarget  = new THREE.Vector3()
 const _lookTarget = new THREE.Vector3()
 const _currentLook = new THREE.Vector3(0, 0, 0)
-const _euler = new THREE.Euler(0, 0, 0, 'YXZ')
+const _euler = new THREE.Euler(0, 0, 0, 'XYZ')
 
 const damp = (lambda: number, delta: number) => 1 - Math.exp(-lambda * delta)
 
 export default function CameraRig() {
   const { camera } = useThree()
-  const selectedId       = useConstellationStore(s => s.selectedId)
+  const selectedId        = useConstellationStore(s => s.selectedId)
+  const constellationRotX = useConstellationStore(s => s.constellationRotX)
   const constellationRotY = useConstellationStore(s => s.constellationRotY)
   const timeRef = useRef(0)
 
@@ -25,7 +26,7 @@ export default function CameraRig() {
       if (!memory) return
 
       // Transform star's local position into world space using current constellation rotation
-      _euler.set(0, constellationRotY, 0)
+      _euler.set(constellationRotX, constellationRotY, 0)
       _lookTarget.set(...memory.position).applyEuler(_euler)
       _camTarget.copy(_lookTarget)
       _camTarget.z += 5
