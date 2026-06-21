@@ -1,24 +1,25 @@
-import { useRef, useEffect, useState, useCallback } from 'react'
+import { useRef, useState, useCallback, useEffect } from 'react'
 
 export function useAmbientAudio() {
-  const audioRef       = useRef<HTMLAudioElement | null>(null)
-  const targetVolRef   = useRef(0.35)
-  const isMutedRef     = useRef(false)
-  const [isMuted, setIsMuted]   = useState(false)
-  const [volume, setVolState]   = useState(0.35)
+  const audioRef     = useRef<HTMLAudioElement | null>(null)
+  const targetVolRef = useRef(0.35)
+  const isMutedRef   = useRef(false)
+  const [isMuted, setIsMuted] = useState(false)
+  const [volume, setVolState] = useState(0.35)
 
   useEffect(() => {
-    const audio = new Audio(import.meta.env.BASE_URL + 'Anya%20Audio.mp4')
-    audio.loop = true
-    audio.volume = 0
-    audioRef.current = audio
-    return () => { audio.pause() }
+    return () => { audioRef.current?.pause() }
   }, [])
 
   const play = useCallback(() => {
-    const audio = audioRef.current
-    if (!audio) return
-    audio.play().catch(() => {})
+    // Defer Audio creation until first play — avoids 44MB network request on page load
+    if (!audioRef.current) {
+      const audio = new Audio(import.meta.env.BASE_URL + 'Anya%20Audio.mp4')
+      audio.loop = true
+      audio.volume = 0
+      audioRef.current = audio
+    }
+    audioRef.current.play().catch(() => {})
     const tick = () => {
       if (!audioRef.current || isMutedRef.current) return
       const next = Math.min(audioRef.current.volume + 0.008, targetVolRef.current)

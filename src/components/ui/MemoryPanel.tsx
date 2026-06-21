@@ -40,6 +40,8 @@ function PhotoCarousel({ photos, themeColor }: CarouselProps) {
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.97 }}
           transition={{ duration: 0.35, ease: 'easeOut' }}
+          loading="lazy"
+          decoding="async"
           style={{ width: '100%', height: '240px', objectFit: 'cover', display: 'block' }}
         />
       </AnimatePresence>
