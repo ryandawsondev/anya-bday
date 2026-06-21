@@ -15,6 +15,8 @@ function makeNebulaTexture(r: number, g: number, b: number): THREE.CanvasTexture
   return new THREE.CanvasTexture(canvas)
 }
 
+const isMobile = typeof window !== 'undefined' && window.matchMedia('(max-width: 768px)').matches
+
 // Module-level singletons — created once, never recreated on re-mount
 const NEBULA_TEX_1 = makeNebulaTexture(40,  10, 140)
 const NEBULA_TEX_2 = makeNebulaTexture(90,  20, 160)
@@ -48,12 +50,12 @@ export default function Starfield() {
   return (
     <>
       {/* Deep background star field */}
-      <Stars radius={200} depth={100} count={4000} factor={2.5} saturation={0.3} fade speed={0.2} />
+      <Stars radius={200} depth={100} count={isMobile ? 2000 : 4000} factor={2.5} saturation={0.3} fade speed={0.2} />
       {/* Mid-field brighter stars */}
-      <Stars radius={60} depth={30} count={600} factor={6} saturation={0.5} fade speed={0.5} />
+      <Stars radius={60} depth={30} count={isMobile ? 300 : 600} factor={6} saturation={0.5} fade speed={0.5} />
 
       {/* Foreground dust / glints */}
-      <Sparkles count={60} scale={16} size={1.4} speed={0.2} opacity={0.55} color="#b0ccff" />
+      <Sparkles count={isMobile ? 30 : 60} scale={16} size={1.4} speed={0.2} opacity={0.55} color="#b0ccff" />
 
       {/* Nebula patches — additive blending, soft radial gradient textures */}
       <NebulaPatch

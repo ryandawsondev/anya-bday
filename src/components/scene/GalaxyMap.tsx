@@ -15,9 +15,9 @@ function GalaxyMapCameraRig() {
     timeRef.current += delta
     const t = timeRef.current
     _camTarget.set(
-      Math.sin(t * 0.08) * 2,
-      Math.cos(t * 0.06) * 1.5,
-      20 + Math.sin(t * 0.05) * 1,
+      Math.sin(t * 0.08) * 1,
+      Math.cos(t * 0.06) * 0.8,
+      26 + Math.sin(t * 0.05) * 0.6,
     )
     camera.position.lerp(_camTarget, 1 - Math.exp(-1.2 * delta))
     camera.lookAt(0, 0, 0)

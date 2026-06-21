@@ -29,7 +29,7 @@ Work through in order. Update status column immediately after each milestone is 
 | 23 | "You are here" label — galaxy name fades in bottom-left when inside a constellation view | Done |
 | 24 | Epilogue screen — final scene triggered after all 4 galaxies fully visited; placeholder personal letter/poem content; own distinct visual style | Done |
 | 25 | Content population — real photos and written memories added across all galaxies; photos compressed to WebP <200KB each | Not Started |
-| 26 | Mobile pass — touch interaction, layout fixes, particle count scaled down if frame rate suffers | Not Started |
+| 26 | Mobile pass — touch interaction, layout fixes, particle count scaled down if frame rate suffers | Done |
 | 27 | Performance pass — image compression verified, asset loading checked, frame rate confirmed across galaxy map and constellation views | Done |
 | 28 | Deployment — `vite.config.ts` base path set, `gh-pages` deploy script confirmed, Pages enabled in repo settings, live link tested end to end through galaxy map → warp → constellation → memory panel | Not Started |
 | 29 | Constellation draw-on animation — when entering a galaxy, constellation lines draw themselves sequentially and stars fade in one by one via `useFrame` + `drawRange`; cinematic entrance instead of instant appearance | Done |

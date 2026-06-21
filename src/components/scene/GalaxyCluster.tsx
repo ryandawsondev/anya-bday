@@ -9,6 +9,7 @@ import { playWarpStart } from '../../audio/soundEffects'
 
 const _scaleTarget = new THREE.Vector3()
 const LOCKED_COLOR = new THREE.Color(0.08, 0.09, 0.14)
+const isTouchDevice = typeof window !== 'undefined' && window.matchMedia('(hover: none)').matches
 
 interface Props {
   galaxy: Galaxy
@@ -97,7 +98,7 @@ export default function GalaxyCluster({ galaxy, isLocked }: Props) {
       <group position={[0, 2.5, 0]}>
         <Html center style={{ pointerEvents: 'none' }}>
           <AnimatePresence>
-            {isHovered && (
+            {(isHovered || isTouchDevice) && (
               <motion.div
                 key="label"
                 initial={{ opacity: 0, y: 14 }}

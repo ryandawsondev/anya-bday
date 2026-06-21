@@ -6,9 +6,10 @@ export default function YouAreHereLabel() {
   const viewMode = useConstellationStore(s => s.viewMode)
   const currentGalaxyId = useConstellationStore(s => s.currentGalaxyId)
   const warpPhase = useConstellationStore(s => s.warpPhase)
+  const selectedId = useConstellationStore(s => s.selectedId)
   const galaxy = galaxies.find(g => g.id === currentGalaxyId)
 
-  const visible = viewMode === 'galaxy' && warpPhase === 'idle' && !!galaxy
+  const visible = viewMode === 'galaxy' && warpPhase === 'idle' && !!galaxy && !selectedId
 
   return (
     <div style={{

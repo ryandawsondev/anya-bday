@@ -1,5 +1,7 @@
 import { motion } from 'motion/react'
 
+const isTouchDevice = typeof window !== 'undefined' && window.matchMedia('(hover: none)').matches
+
 interface Props {
   isMuted: boolean
   volume: number
@@ -49,20 +51,22 @@ export default function VolumeControl({ isMuted, volume, onToggle, onVolumeChang
         {isMuted || volume === 0 ? '🔇' : volume < 0.4 ? '🔉' : '🔊'}
       </button>
 
-      <input
-        type="range"
-        min={0}
-        max={1}
-        step={0.01}
-        value={displayVol}
-        onChange={e => onVolumeChange(Number(e.target.value))}
-        style={{
-          width: '72px',
-          accentColor: '#4a8fff',
-          cursor: 'pointer',
-          margin: 0,
-        }}
-      />
+      {!isTouchDevice && (
+        <input
+          type="range"
+          min={0}
+          max={1}
+          step={0.01}
+          value={displayVol}
+          onChange={e => onVolumeChange(Number(e.target.value))}
+          style={{
+            width: '72px',
+            accentColor: '#4a8fff',
+            cursor: 'pointer',
+            margin: 0,
+          }}
+        />
+      )}
     </motion.div>
   )
 }
