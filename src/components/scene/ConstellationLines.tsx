@@ -9,12 +9,15 @@ interface Props {
 
 export default function ConstellationLines({ memories, connections }: Props) {
   const geometry = useMemo(() => {
-    const points: THREE.Vector3[] = []
-    for (const [a, b] of connections) {
-      points.push(new THREE.Vector3(...memories[a].position))
-      points.push(new THREE.Vector3(...memories[b].position))
-    }
-    return new THREE.BufferGeometry().setFromPoints(points)
+    const arr = new Float32Array(connections.length * 6)
+    connections.forEach(([a, b], i) => {
+      const [ax, ay, az] = memories[a].position
+      const [bx, by, bz] = memories[b].position
+      arr.set([ax, ay, az, bx, by, bz], i * 6)
+    })
+    const geo = new THREE.BufferGeometry()
+    geo.setAttribute('position', new THREE.BufferAttribute(arr, 3))
+    return geo
   }, [memories, connections])
 
   return (

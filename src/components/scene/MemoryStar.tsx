@@ -47,10 +47,9 @@ interface Props { memory: Memory }
 export default function MemoryStar({ memory }: Props) {
   const coreRef = useRef<THREE.Sprite>(null)
   const haloRef = useRef<THREE.Sprite>(null)
-  const { selectedId, hoveredId, visitedIds, setSelected, setHovered, markVisited } = useConstellationStore()
-  const isSelected = selectedId === memory.id
-  const isHovered  = hoveredId  === memory.id
-  const isVisited  = visitedIds.includes(memory.id)
+  const isSelected = useConstellationStore(s => s.selectedId === memory.id)
+  const isHovered  = useConstellationStore(s => s.hoveredId  === memory.id)
+  const isVisited  = useConstellationStore(s => s.visitedIds.includes(memory.id))
   const pulseOffset = useMemo(() => Math.random() * Math.PI * 2, [])
 
   const [coreMat] = useMemo(() => [
@@ -93,15 +92,16 @@ export default function MemoryStar({ memory }: Props) {
         onClick={(e: ThreeEvent<MouseEvent>) => {
           e.stopPropagation()
           playStarClick()
+          const { markVisited, setSelected, selectedId } = useConstellationStore.getState()
           markVisited(memory.id)
-          setSelected(isSelected ? null : memory.id)
+          setSelected(selectedId === memory.id ? null : memory.id)
         }}
         onPointerOver={(e: ThreeEvent<PointerEvent>) => {
           e.stopPropagation()
           playStarHover()
-          setHovered(memory.id)
+          useConstellationStore.getState().setHovered(memory.id)
         }}
-        onPointerOut={() => setHovered(null)}
+        onPointerOut={() => useConstellationStore.getState().setHovered(null)}
       >
         <sphereGeometry args={[0.3, 6, 6]} />
         <meshBasicMaterial transparent opacity={0} depthWrite={false} />

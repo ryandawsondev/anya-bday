@@ -1,8 +1,6 @@
-import { useMemo } from 'react'
 import { Stars, Sparkles } from '@react-three/drei'
 import * as THREE from 'three'
 
-// Procedural radial-gradient texture for soft nebula blobs
 function makeNebulaTexture(r: number, g: number, b: number): THREE.CanvasTexture {
   const canvas = document.createElement('canvas')
   canvas.width = 128
@@ -17,16 +15,20 @@ function makeNebulaTexture(r: number, g: number, b: number): THREE.CanvasTexture
   return new THREE.CanvasTexture(canvas)
 }
 
+// Module-level singletons — created once, never recreated on re-mount
+const NEBULA_TEX_1 = makeNebulaTexture(40,  10, 140)
+const NEBULA_TEX_2 = makeNebulaTexture(90,  20, 160)
+const NEBULA_TEX_3 = makeNebulaTexture(20,  30, 120)
+
 interface NebulaProps {
-  r: number; g: number; b: number
+  tex: THREE.CanvasTexture
   position: [number, number, number]
   rotation: [number, number, number]
   size: number
   opacity: number
 }
 
-function NebulaPatch({ r, g, b, position, rotation, size, opacity }: NebulaProps) {
-  const tex = useMemo(() => makeNebulaTexture(r, g, b), [r, g, b])
+function NebulaPatch({ tex, position, rotation, size, opacity }: NebulaProps) {
   return (
     <mesh position={position} rotation={rotation}>
       <planeGeometry args={[size, size]} />
@@ -55,19 +57,19 @@ export default function Starfield() {
 
       {/* Nebula patches — additive blending, soft radial gradient textures */}
       <NebulaPatch
-        r={40} g={10} b={140}
+        tex={NEBULA_TEX_1}
         position={[-25, 12, -90]}
         rotation={[0.4, 0.6, 0.2]}
         size={140} opacity={0.10}
       />
       <NebulaPatch
-        r={90} g={20} b={160}
+        tex={NEBULA_TEX_2}
         position={[30, -8, -100]}
         rotation={[-0.3, -0.5, 0.4]}
         size={120} opacity={0.08}
       />
       <NebulaPatch
-        r={20} g={30} b={120}
+        tex={NEBULA_TEX_3}
         position={[10, 20, -75]}
         rotation={[0.7, 0.2, -0.3]}
         size={100} opacity={0.07}

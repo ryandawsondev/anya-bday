@@ -42,7 +42,7 @@ export default function GalaxyCluster({ galaxy }: Props) {
 
   return (
     <group position={galaxy.mapPosition}>
-      <Sparkles count={100} scale={4} size={1.5} speed={0.2} color={galaxy.themeColor} opacity={0.7} />
+      <Sparkles count={55} scale={4} size={1.5} speed={0.2} color={galaxy.themeColor} opacity={0.7} />
 
       <mesh ref={coreRef}>
         <sphereGeometry args={[0.25, 16, 16]} />
