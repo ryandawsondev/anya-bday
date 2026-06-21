@@ -22,9 +22,10 @@ function useTypewriter(text: string, charDelay = 26) {
 interface CarouselProps {
   photos: string[]
   themeColor: string
+  onOpenLightbox: (idx: number) => void
 }
 
-function PhotoCarousel({ photos, themeColor }: CarouselProps) {
+function PhotoCarousel({ photos, themeColor, onOpenLightbox }: CarouselProps) {
   const [idx, setIdx] = useState(0)
   const prev = () => setIdx(i => (i - 1 + photos.length) % photos.length)
   const next = () => setIdx(i => (i + 1) % photos.length)
@@ -42,7 +43,8 @@ function PhotoCarousel({ photos, themeColor }: CarouselProps) {
           transition={{ duration: 0.35, ease: 'easeOut' }}
           loading="lazy"
           decoding="async"
-          style={{ width: '100%', height: '240px', objectFit: 'cover', display: 'block' }}
+          onClick={() => onOpenLightbox(idx)}
+          style={{ width: '100%', height: '240px', objectFit: 'cover', display: 'block', cursor: 'zoom-in' }}
         />
       </AnimatePresence>
 
@@ -98,10 +100,86 @@ function PhotoCarousel({ photos, themeColor }: CarouselProps) {
   )
 }
 
+interface LightboxProps {
+  src: string
+  onClose: () => void
+}
+
+function Lightbox({ src, onClose }: LightboxProps) {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [onClose])
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.25 }}
+      onClick={onClose}
+      style={{
+        position: 'fixed',
+        inset: 0,
+        background: 'rgba(0,0,0,0.92)',
+        backdropFilter: 'blur(14px)',
+        WebkitBackdropFilter: 'blur(14px)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 100,
+        cursor: 'zoom-out',
+      }}
+    >
+      <motion.img
+        src={src}
+        alt=""
+        initial={{ scale: 0.92, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.92, opacity: 0 }}
+        transition={{ duration: 0.3, ease: 'easeOut' }}
+        onClick={e => e.stopPropagation()}
+        style={{
+          maxWidth: 'min(90vw, 900px)',
+          maxHeight: '85vh',
+          objectFit: 'contain',
+          borderRadius: '0.75rem',
+          boxShadow: '0 24px 80px rgba(0,0,0,0.8)',
+          cursor: 'default',
+        }}
+      />
+      <button
+        onClick={onClose}
+        style={{
+          position: 'absolute',
+          top: '1.5rem',
+          right: '1.5rem',
+          background: 'rgba(255,255,255,0.08)',
+          border: '1px solid rgba(255,255,255,0.18)',
+          color: '#fff',
+          width: '36px',
+          height: '36px',
+          borderRadius: '50%',
+          cursor: 'pointer',
+          fontSize: '1.1rem',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backdropFilter: 'blur(4px)',
+        }}
+      >
+        ×
+      </button>
+    </motion.div>
+  )
+}
+
 export default function MemoryPanel() {
   const { selectedId, setSelected, currentGalaxyId } = useConstellationStore()
   const galaxy = galaxies.find(g => g.id === currentGalaxyId) ?? galaxies[0]
   const memory = galaxy.memories.find(m => m.id === selectedId)
+  const [lightboxIdx, setLightboxIdx] = useState<number | null>(null)
 
   const { displayed, done } = useTypewriter(memory?.note ?? '')
 
@@ -111,77 +189,94 @@ export default function MemoryPanel() {
   const hasPhotos = memory.photos.length > 0
 
   return (
-    <motion.div
-      style={{
-        position: 'fixed',
-        bottom: '1.5rem',
-        left: '50%',
-        x: '-50%',
-        width: 'min(460px, calc(100vw - 2rem))',
-        background: 'rgba(4, 8, 24, 0.88)',
-        backdropFilter: 'blur(24px)',
-        WebkitBackdropFilter: 'blur(24px)',
-        border: `1px solid ${theme}40`,
-        borderRadius: '1.25rem',
-        overflow: 'hidden',
-        color: 'white',
-        zIndex: 20,
-        boxShadow: `0 24px 64px rgba(0,0,0,0.6), 0 0 48px ${theme}1a`,
-      }}
-      initial={{ opacity: 0, y: 32 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: 32 }}
-      transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-    >
-      {/* Photo carousel — slides in after typewriter finishes */}
+    <>
+      {/* Lightbox rendered outside the transformed panel so position:fixed works correctly */}
       <AnimatePresence>
-        {done && hasPhotos && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-            style={{ overflow: 'hidden' }}
-          >
-            <PhotoCarousel photos={memory.photos} themeColor={theme} />
-          </motion.div>
+        {lightboxIdx !== null && memory.photos[lightboxIdx] && (
+          <Lightbox
+            key={lightboxIdx}
+            src={memory.photos[lightboxIdx]}
+            onClose={() => setLightboxIdx(null)}
+          />
         )}
       </AnimatePresence>
 
-      <div style={{ padding: '1.25rem 1.5rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem', gap: '1rem' }}>
-          <div>
-            <h2 style={{ margin: 0, fontSize: '1rem', fontWeight: 600, color: '#ccdaee', letterSpacing: '0.01em' }}>
-              {memory.title}
-            </h2>
-            {memory.date && (
-              <p style={{ margin: '0.2rem 0 0', fontSize: '0.7rem', color: `${theme}bb`, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-                {memory.date}
-              </p>
-            )}
-          </div>
-          <button
-            onClick={() => setSelected(null)}
-            aria-label="Close"
-            style={{ flexShrink: 0, background: 'transparent', border: 'none', color: '#3a5070', cursor: 'pointer', fontSize: '1.5rem', lineHeight: 1, padding: '0 0.1rem', marginTop: '-0.1rem' }}
-          >
-            ×
-          </button>
-        </div>
-
-        <p style={{ margin: 0, fontSize: '0.88rem', lineHeight: 1.75, color: '#7a94b0', minHeight: '1.5em' }}>
-          {displayed}
-          {!done && (
-            <motion.span
-              animate={{ opacity: [1, 0, 1] }}
-              transition={{ duration: 1.0, repeat: Infinity, ease: 'linear' }}
-              style={{ color: theme, marginLeft: '1px' }}
+      <motion.div
+        style={{
+          position: 'fixed',
+          bottom: '1.5rem',
+          left: '50%',
+          x: '-50%',
+          width: 'min(460px, calc(100vw - 2rem))',
+          background: 'rgba(4, 8, 24, 0.88)',
+          backdropFilter: 'blur(24px)',
+          WebkitBackdropFilter: 'blur(24px)',
+          border: `1px solid ${theme}40`,
+          borderRadius: '1.25rem',
+          overflow: 'hidden',
+          color: 'white',
+          zIndex: 20,
+          boxShadow: `0 24px 64px rgba(0,0,0,0.6), 0 0 48px ${theme}1a`,
+        }}
+        initial={{ opacity: 0, y: 32 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: 32 }}
+        transition={{ type: 'spring', damping: 28, stiffness: 320 }}
+      >
+        {/* Photo carousel — slides in after typewriter finishes */}
+        <AnimatePresence>
+          {done && hasPhotos && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+              style={{ overflow: 'hidden' }}
             >
-              |
-            </motion.span>
+              <PhotoCarousel
+                photos={memory.photos}
+                themeColor={theme}
+                onOpenLightbox={setLightboxIdx}
+              />
+            </motion.div>
           )}
-        </p>
-      </div>
-    </motion.div>
+        </AnimatePresence>
+
+        <div style={{ padding: '1.25rem 1.5rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem', gap: '1rem' }}>
+            <div>
+              <h2 style={{ margin: 0, fontSize: '1rem', fontWeight: 600, color: '#ccdaee', letterSpacing: '0.01em' }}>
+                {memory.title}
+              </h2>
+              {memory.date && (
+                <p style={{ margin: '0.2rem 0 0', fontSize: '0.7rem', color: `${theme}bb`, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+                  {memory.date}
+                </p>
+              )}
+            </div>
+            <button
+              onClick={() => setSelected(null)}
+              aria-label="Close"
+              style={{ flexShrink: 0, background: 'transparent', border: 'none', color: '#3a5070', cursor: 'pointer', fontSize: '1.5rem', lineHeight: 1, padding: '0 0.1rem', marginTop: '-0.1rem' }}
+            >
+              ×
+            </button>
+          </div>
+
+          <p style={{ margin: 0, fontSize: '0.88rem', lineHeight: 1.75, color: '#7a94b0', minHeight: '1.5em' }}>
+            {displayed}
+            {!done && (
+              <motion.span
+                animate={{ opacity: [1, 0, 1] }}
+                transition={{ duration: 1.0, repeat: Infinity, ease: 'linear' }}
+                style={{ color: theme, marginLeft: '1px' }}
+              >
+                |
+              </motion.span>
+            )}
+          </p>
+        </div>
+      </motion.div>
+    </>
   )
 }

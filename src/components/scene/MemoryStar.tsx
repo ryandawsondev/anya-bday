@@ -42,15 +42,23 @@ const HALO_COLOR    = new THREE.Color(5, 4, 1.5)
 const VISITED_COLOR = new THREE.Color(3.5, 5.5, 8)
 const VISITED_HALO  = new THREE.Color(2, 3.5, 5.5)
 
-interface Props { memory: Memory }
+const BURST_COUNT = 12
+const BURST_DUR   = 0.45
 
-export default function MemoryStar({ memory }: Props) {
+interface Props {
+  memory: Memory
+  revealDelay?: number
+}
+
+export default function MemoryStar({ memory, revealDelay = 0 }: Props) {
   const coreRef = useRef<THREE.Sprite>(null)
   const haloRef = useRef<THREE.Sprite>(null)
   const isSelected = useConstellationStore(s => s.selectedId === memory.id)
   const isHovered  = useConstellationStore(s => s.hoveredId  === memory.id)
   const isVisited  = useConstellationStore(s => s.visitedIds.includes(memory.id))
   const pulseOffset = useMemo(() => Math.random() * Math.PI * 2, [])
+  const mountTime   = useRef(performance.now())
+  const burstTrigger = useRef(-Infinity)
 
   const [coreMat] = useMemo(() => [
     new THREE.SpriteMaterial({
@@ -65,10 +73,44 @@ export default function MemoryStar({ memory }: Props) {
     }),
   ], [])
 
+  // Per-instance randomised burst directions
+  const burstDirs = useMemo(() => {
+    const arr = new Float32Array(BURST_COUNT * 3)
+    for (let i = 0; i < BURST_COUNT; i++) {
+      const theta = (i / BURST_COUNT) * Math.PI * 2 + Math.random() * 0.4
+      const phi   = (Math.random() - 0.5) * 1.0
+      const speed = 1.5 + Math.random() * 0.8
+      arr[i * 3]     = Math.cos(theta) * Math.cos(phi) * speed
+      arr[i * 3 + 1] = Math.sin(phi) * speed
+      arr[i * 3 + 2] = Math.sin(theta) * Math.cos(phi) * speed
+    }
+    return arr
+  }, [])
+
+  const burstGeo = useMemo(() => {
+    const geo = new THREE.BufferGeometry()
+    geo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(BURST_COUNT * 3), 3))
+    return geo
+  }, [])
+
+  const burstMat = useMemo(() => new THREE.PointsMaterial({
+    size: 0.07,
+    color: '#ffd080',
+    transparent: true,
+    opacity: 0,
+    depthWrite: false,
+    blending: THREE.AdditiveBlending,
+    toneMapped: false,
+  }), [])
+
   useFrame(({ clock }) => {
     if (!coreRef.current || !haloRef.current) return
     const t = clock.getElapsedTime()
     const pulse = 1 + Math.sin(t * 1.4 + pulseOffset) * 0.07
+
+    // Reveal fade-in
+    const revealElapsed = (performance.now() - mountTime.current) / 1000
+    const revealFade = Math.min(Math.max((revealElapsed - revealDelay) / 0.6, 0), 1)
 
     const baseScale = isVisited ? 0.20 : 0.26
     const targetCore = isSelected ? 0.52 : isHovered ? 0.40 : baseScale * pulse
@@ -76,13 +118,35 @@ export default function MemoryStar({ memory }: Props) {
 
     const cx = coreRef.current.scale.x
     const hx = haloRef.current.scale.x
-    coreRef.current.scale.setScalar(THREE.MathUtils.lerp(cx, targetCore, 0.12))
-    haloRef.current.scale.setScalar(THREE.MathUtils.lerp(hx, targetHalo, 0.10))
+    coreRef.current.scale.setScalar(THREE.MathUtils.lerp(cx, targetCore, 0.12) * revealFade)
+    haloRef.current.scale.setScalar(THREE.MathUtils.lerp(hx, targetHalo, 0.10) * revealFade)
 
     const baseCore = isVisited ? VISITED_COLOR : CORE_COLOR
     coreMat.color.copy(isSelected ? SEL_COLOR : isHovered ? HOVER_COLOR : baseCore)
     haloMat.color.copy(isVisited ? VISITED_HALO : HALO_COLOR)
-    haloMat.opacity = isSelected ? 0.9 : isHovered ? 0.75 : (isVisited ? 0.35 : 0.55)
+    haloMat.opacity = (isSelected ? 0.9 : isHovered ? 0.75 : (isVisited ? 0.35 : 0.55)) * revealFade
+
+    // Burst animation
+    const bElapsed = (performance.now() - burstTrigger.current) / 1000
+    if (bElapsed < BURST_DUR) {
+      const bt = bElapsed / BURST_DUR
+      const ease = 1 - (1 - bt) * (1 - bt)
+      const posAttr = burstGeo.attributes.position as THREE.BufferAttribute
+      const posArr  = posAttr.array as Float32Array
+      for (let i = 0; i < BURST_COUNT; i++) {
+        posArr[i * 3]     = burstDirs[i * 3]     * ease
+        posArr[i * 3 + 1] = burstDirs[i * 3 + 1] * ease
+        posArr[i * 3 + 2] = burstDirs[i * 3 + 2] * ease
+      }
+      posAttr.needsUpdate = true
+      burstMat.opacity = (1 - bt * bt) * 0.9
+      burstMat.size    = 0.05 + bt * 0.04
+    } else if (bElapsed < BURST_DUR + 0.06) {
+      const posAttr = burstGeo.attributes.position as THREE.BufferAttribute
+      ;(posAttr.array as Float32Array).fill(0)
+      posAttr.needsUpdate = true
+      burstMat.opacity = 0
+    }
   })
 
   return (
@@ -92,6 +156,7 @@ export default function MemoryStar({ memory }: Props) {
         onClick={(e: ThreeEvent<MouseEvent>) => {
           e.stopPropagation()
           playStarClick()
+          burstTrigger.current = performance.now()
           const { markVisited, setSelected, selectedId } = useConstellationStore.getState()
           markVisited(memory.id)
           setSelected(selectedId === memory.id ? null : memory.id)
@@ -106,6 +171,9 @@ export default function MemoryStar({ memory }: Props) {
         <sphereGeometry args={[0.3, 6, 6]} />
         <meshBasicMaterial transparent opacity={0} depthWrite={false} />
       </mesh>
+
+      {/* Burst particles */}
+      <points geometry={burstGeo} material={burstMat} />
 
       {/* Soft halo — large, very soft glow */}
       <sprite ref={haloRef} material={haloMat} />

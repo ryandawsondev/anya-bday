@@ -3,6 +3,7 @@ import { useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import GalaxyCluster from './GalaxyCluster'
 import { galaxies } from '../../data/galaxies'
+import { useConstellationStore } from '../../state/useConstellationStore'
 
 const _camTarget = new THREE.Vector3()
 
@@ -26,11 +27,20 @@ function GalaxyMapCameraRig() {
 }
 
 export default function GalaxyMap() {
+  const visitedIds = useConstellationStore(s => s.visitedIds)
+  const mainGalaxies = galaxies.filter(g => !g.hidden)
+  const allMainComplete = mainGalaxies.length > 0 &&
+    mainGalaxies.every(g => g.memories.length > 0 && g.memories.every(m => visitedIds.includes(m.id)))
+
   return (
     <>
       <GalaxyMapCameraRig />
       {galaxies.map(g => (
-        <GalaxyCluster key={g.id} galaxy={g} />
+        <GalaxyCluster
+          key={g.id}
+          galaxy={g}
+          isLocked={!!g.hidden && !allMainComplete}
+        />
       ))}
     </>
   )

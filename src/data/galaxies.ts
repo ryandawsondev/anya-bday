@@ -11,6 +11,7 @@ export interface Galaxy {
   mapPosition: [number, number, number]
   memories: Memory[]
   connections: [number, number][]
+  hidden?: boolean
 }
 
 function placeholder(id: string, position: [number, number, number]): Memory {
@@ -61,6 +62,23 @@ const heartConnections: [number, number][] = [
   [4, 5], [5, 6], [6, 7], [7, 0],
 ]
 
+// Secret galaxy — gem/jewel shape; unlocks after all main galaxies complete
+const secretPositions: [number, number, number][] = [
+  [ 0,    2.2,  0   ],
+  [ 1.6,  1.6,  0.2 ],
+  [ 2.2,  0,   -0.1 ],
+  [ 1.6, -1.6,  0.3 ],
+  [ 0,   -2.2,  0   ],
+  [-1.6, -1.6, -0.2 ],
+  [-2.2,  0,    0.1 ],
+  [-1.6,  1.6, -0.3 ],
+  [ 0,    0,    0   ],
+]
+const secretConnections: [number, number][] = [
+  [0,1],[1,2],[2,3],[3,4],[4,5],[5,6],[6,7],[7,0],
+  [0,8],[2,8],[4,8],[6,8],
+]
+
 export const galaxies: Galaxy[] = [
   {
     id: 'the-date',
@@ -97,5 +115,15 @@ export const galaxies: Galaxy[] = [
     mapPosition: [6, -4, -1],
     memories: heartPositions.map((pos, i) => placeholder(`us-${i + 1}`, pos)),
     connections: heartConnections,
+  },
+  {
+    id: 'secret',
+    name: 'Always',
+    description: 'A little extra love',
+    themeColor: '#ff9de2',
+    mapPosition: [0, 0, 3],
+    memories: secretPositions.map((pos, i) => placeholder(`secret-${i + 1}`, pos)),
+    connections: secretConnections,
+    hidden: true,
   },
 ]

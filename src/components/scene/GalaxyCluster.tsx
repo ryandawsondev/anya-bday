@@ -8,12 +8,14 @@ import { useConstellationStore } from '../../state/useConstellationStore'
 import { playWarpStart } from '../../audio/soundEffects'
 
 const _scaleTarget = new THREE.Vector3()
+const LOCKED_COLOR = new THREE.Color(0.08, 0.09, 0.14)
 
 interface Props {
   galaxy: Galaxy
+  isLocked?: boolean
 }
 
-export default function GalaxyCluster({ galaxy }: Props) {
+export default function GalaxyCluster({ galaxy, isLocked }: Props) {
   const coreRef = useRef<THREE.Mesh>(null)
   const hoveredGalaxyId = useConstellationStore(s => s.hoveredGalaxyId)
   const visitedIds = useConstellationStore(s => s.visitedIds)
@@ -33,12 +35,45 @@ export default function GalaxyCluster({ galaxy }: Props) {
 
   useFrame(({ clock }, delta) => {
     if (!coreRef.current) return
+    if (isLocked) {
+      const pulse = 1 + Math.sin(clock.getElapsedTime() * 0.7) * 0.08
+      coreRef.current.scale.setScalar(pulse)
+      ;(coreRef.current.material as THREE.MeshBasicMaterial).color.copy(LOCKED_COLOR)
+      return
+    }
     const pulse = isComplete ? 1.0 + Math.sin(clock.getElapsedTime() * 2.2) * 0.18 : 1.0
     const baseScale = isComplete ? 1.15 * pulse : 1.0
     _scaleTarget.setScalar(isHovered ? 1.4 : baseScale)
     coreRef.current.scale.lerp(_scaleTarget, 1 - Math.exp(-8 * delta))
     ;(coreRef.current.material as THREE.MeshBasicMaterial).color.copy(isComplete ? hdrColorComplete : hdrColor)
   })
+
+  if (isLocked) {
+    return (
+      <group position={galaxy.mapPosition}>
+        <Sparkles count={18} scale={3} size={0.7} speed={0.08} color="#334" opacity={0.2} />
+        <mesh ref={coreRef}>
+          <sphereGeometry args={[0.14, 16, 16]} />
+          <meshBasicMaterial color={LOCKED_COLOR} toneMapped={false} />
+        </mesh>
+        <group position={[0, 2.0, 0]}>
+          <Html center style={{ pointerEvents: 'none' }}>
+            <div style={{
+              textAlign: 'center',
+              color: 'rgba(255,255,255,0.18)',
+              fontFamily: 'Georgia, serif',
+              userSelect: 'none',
+              whiteSpace: 'nowrap',
+              letterSpacing: '0.35em',
+              fontSize: '20px',
+            }}>
+              ???
+            </div>
+          </Html>
+        </group>
+      </group>
+    )
+  }
 
   return (
     <group position={galaxy.mapPosition}>
@@ -59,7 +94,6 @@ export default function GalaxyCluster({ galaxy }: Props) {
         <meshBasicMaterial transparent opacity={0} depthWrite={false} />
       </mesh>
 
-      {/* Label anchored 2.5 units above cluster centre — no distanceFactor so pixel size is consistent */}
       <group position={[0, 2.5, 0]}>
         <Html center style={{ pointerEvents: 'none' }}>
           <AnimatePresence>

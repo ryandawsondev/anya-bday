@@ -32,11 +32,11 @@ Work through in order. Update status column immediately after each milestone is 
 | 26 | Mobile pass — touch interaction, layout fixes, particle count scaled down if frame rate suffers | Not Started |
 | 27 | Performance pass — image compression verified, asset loading checked, frame rate confirmed across galaxy map and constellation views | Done |
 | 28 | Deployment — `vite.config.ts` base path set, `gh-pages` deploy script confirmed, Pages enabled in repo settings, live link tested end to end through galaxy map → warp → constellation → memory panel | Not Started |
-| 29 | Constellation draw-on animation — when entering a galaxy, constellation lines draw themselves sequentially and stars fade in one by one via `useFrame` + `drawRange`; cinematic entrance instead of instant appearance | Not Started |
-| 30 | Memory star burst — clicking a memory-star emits a radial particle burst (10–12 particles, ~0.4s lifetime) for a satisfying selection moment | Not Started |
-| 31 | Hidden 5th galaxy — secret galaxy that appears on the map only after all 4 main galaxies are fully visited; shown as "???" until unlocked, then reveals with a special name and unique theme | Not Started |
-| 32 | Galaxy-tinted nebula — each galaxy view tints scene fog and ambient light to match its `themeColor`; currently all galaxy interiors share the same dark void | Not Started |
-| 33 | Epilogue polish — handwritten-style font, slower dramatic typewriter, signature line, seal/stamp reveal animation; elevates the emotional finale | Not Started |
-| 34 | "Days together" counter — intro or epilogue displays exact day count since a meaningful date (first met, etc.); one line of math, high emotional impact | Not Started |
-| 35 | Easter egg — typing "ANYA" on keyboard triggers a special effect (confetti burst, hidden star, secret message); rewarding discovery moment | Not Started |
-| 36 | Photo lightbox — clicking a photo in MemoryPanel opens it full-screen with a close button; removes the 240px height cap | Not Started |
+| 29 | Constellation draw-on animation — when entering a galaxy, constellation lines draw themselves sequentially and stars fade in one by one via `useFrame` + `drawRange`; cinematic entrance instead of instant appearance | Done |
+| 30 | Memory star burst — clicking a memory-star emits a radial particle burst (10–12 particles, ~0.4s lifetime) for a satisfying selection moment | Done |
+| 31 | Hidden 5th galaxy — secret galaxy that appears on the map only after all 4 main galaxies are fully visited; shown as "???" until unlocked, then reveals with a special name and unique theme | Done |
+| 32 | Galaxy-tinted nebula — each galaxy view tints scene fog and ambient light to match its `themeColor`; currently all galaxy interiors share the same dark void | Done |
+| 33 | Epilogue polish — handwritten-style font, slower dramatic typewriter, signature line, seal/stamp reveal animation; elevates the emotional finale | Done |
+| 34 | "Days together" counter — intro or epilogue displays exact day count since a meaningful date (first met, etc.); one line of math, high emotional impact | Done |
+| 35 | Easter egg — typing "ANYA" on keyboard triggers a special effect (confetti burst, hidden star, secret message); rewarding discovery moment | Done |
+| 36 | Photo lightbox — clicking a photo in MemoryPanel opens it full-screen with a close button; removes the 240px height cap | Done |

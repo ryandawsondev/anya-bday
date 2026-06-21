@@ -1,5 +1,5 @@
-import { Suspense, useRef } from 'react'
-import { Canvas, useFrame } from '@react-three/fiber'
+import { Suspense, useRef, useEffect } from 'react'
+import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import { EffectComposer, Bloom } from '@react-three/postprocessing'
 import Starfield from './Starfield'
@@ -13,6 +13,38 @@ import { galaxies } from '../../data/galaxies'
 import { useConstellationStore } from '../../state/useConstellationStore'
 import { useConstellationDrag } from '../../hooks/useConstellationDrag'
 import { useScrollZoom } from '../../hooks/useScrollZoom'
+
+const BASE_BG = new THREE.Color('#000208')
+
+// Lerps scene.background toward the current galaxy's theme tint (M32)
+function SceneAmbience() {
+  const { scene } = useThree()
+  const viewMode        = useConstellationStore(s => s.viewMode)
+  const currentGalaxyId = useConstellationStore(s => s.currentGalaxyId)
+
+  const currentColor = useRef(new THREE.Color('#000208'))
+  const targetColor  = useRef(new THREE.Color('#000208'))
+
+  useEffect(() => {
+    scene.background = currentColor.current
+    return () => { scene.background = null }
+  }, [scene])
+
+  useFrame((_, delta) => {
+    const galaxy = viewMode === 'galaxy'
+      ? galaxies.find(g => g.id === currentGalaxyId)
+      : null
+
+    if (galaxy) {
+      targetColor.current.set(galaxy.themeColor).multiplyScalar(0.035).add(BASE_BG)
+    } else {
+      targetColor.current.copy(BASE_BG)
+    }
+    currentColor.current.lerp(targetColor.current, 1 - Math.exp(-1.8 * delta))
+  })
+
+  return null
+}
 
 function SceneClickCatcher() {
   const setSelected = useConstellationStore(s => s.setSelected)
@@ -38,8 +70,8 @@ function ConstellationGroup() {
   return (
     <group ref={groupRef}>
       <ConstellationLines memories={galaxy.memories} connections={galaxy.connections} />
-      {galaxy.memories.map(m => (
-        <MemoryStar key={m.id} memory={m} />
+      {galaxy.memories.map((m, i) => (
+        <MemoryStar key={m.id} memory={m} revealDelay={0.5 + i * 0.12} />
       ))}
     </group>
   )
@@ -58,7 +90,7 @@ export default function ConstellationScene() {
       style={{ width: '100%', height: '100%' }}
       dpr={[1, 1.5]}
     >
-      <color attach="background" args={['#000208']} />
+      <SceneAmbience />
 
       <Suspense fallback={null}>
         <Starfield />
