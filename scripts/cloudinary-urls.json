@@ -427,5 +427,13 @@
     "bytes": 13704,
     "format": "jpg",
     "resourceType": "image"
+  },
+  "ukrainian_flag.webp": {
+    "original": "ukrainian_flag.webp",
+    "publicId": "anya-bday/ukrainian_flag",
+    "url": "https://res.cloudinary.com/df9cka4lv/image/upload/v1782348356/anya-bday/ukrainian_flag.webp",
+    "bytes": 12746,
+    "format": "webp",
+    "resourceType": "image"
   }
 }

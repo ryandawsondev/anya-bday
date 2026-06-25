@@ -392,13 +392,15 @@ const secretPositions: [number, number, number][] = [
   [2.1, 0.7, 0.2],
   [1.3, -1.8, -0.1],
   [-1.3, -1.8, 0.3],
+  [-2.1, 0.7, 0.1],
 ]
 
 const secretConnections: [number, number][] = [
   [0, 1],
   [1, 2],
   [2, 3],
-  [3, 0],
+  [3, 4],
+  [4, 0],
 ]
 
 const secretMemories: Memory[] = [
@@ -448,6 +450,18 @@ const secretMemories: Memory[] = [
     photos: [
       img(
         'https://res.cloudinary.com/df9cka4lv/image/upload/v1782347123/anya-bday/way-forward.jpg',
+      ),
+    ],
+  },
+  {
+    id: 'secret-ukrainian',
+    position: secretPositions[4],
+    title: 'Ukrainian',
+    date: 'June 25, 2026',
+    note: "I've been secretly learning Ukrainian over the past 2 months. I'm not great but I'm getting there!",
+    photos: [
+      img(
+        'https://res.cloudinary.com/df9cka4lv/image/upload/v1782348356/anya-bday/ukrainian_flag.webp',
       ),
     ],
   },
