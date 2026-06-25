@@ -24,7 +24,7 @@ const isPastBirthday = () => import.meta.env.VITE_UNLOCK === 'true' || new Date(
 type Scene = 'loading' | 'countdown' | 'intro' | 'cinematic' | 'constellation' | 'epilogue'
 
 function DevNav({ scene, setScene }: { scene: Scene; setScene: (s: Scene) => void }) {
-  if (!import.meta.env.DEV) return null
+  if (!import.meta.env.DEV || import.meta.env.VITE_UNLOCK === 'true') return null
   const viewMode = useConstellationStore(s => s.viewMode)
 
   const goTo = (s: Scene, vm?: 'map' | 'galaxy') => {
