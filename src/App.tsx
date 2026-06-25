@@ -13,13 +13,15 @@ import CinematicText from './components/ui/CinematicText'
 import VolumeControl from './components/ui/VolumeControl'
 import YouAreHereLabel from './components/ui/YouAreHereLabel'
 import EpilogueScreen from './components/ui/EpilogueScreen'
+import LoadingScreen from './components/ui/LoadingScreen'
 import { useConstellationStore } from './state/useConstellationStore'
 import { useAmbientAudio } from './hooks/useAmbientAudio'
 import { useEasterEgg } from './hooks/useEasterEgg'
+import { usePreloader } from './hooks/usePreloader'
 
 const isPastBirthday = () => import.meta.env.VITE_UNLOCK === 'true' || new Date() >= BIRTHDAY_DATE
 
-type Scene = 'countdown' | 'intro' | 'cinematic' | 'constellation' | 'epilogue'
+type Scene = 'loading' | 'countdown' | 'intro' | 'cinematic' | 'constellation' | 'epilogue'
 
 function DevNav({ scene, setScene }: { scene: Scene; setScene: (s: Scene) => void }) {
   if (!import.meta.env.DEV) return null
@@ -85,7 +87,21 @@ function allGalaxiesComplete(visitedIds: string[]): boolean {
 }
 
 export default function App() {
-  const [scene, setScene] = useState<Scene>(isPastBirthday() ? 'intro' : 'countdown')
+  const [scene, setScene] = useState<Scene>('loading')
+  const { progress, done: preloadDone } = usePreloader()
+  const [minElapsed, setMinElapsed] = useState(false)
+
+  useEffect(() => {
+    const t = setTimeout(() => setMinElapsed(true), 2500)
+    return () => clearTimeout(t)
+  }, [])
+
+  useEffect(() => {
+    if (preloadDone && minElapsed && scene === 'loading') {
+      setScene(isPastBirthday() ? 'intro' : 'countdown')
+    }
+  }, [preloadDone, minElapsed, scene])
+
   const [epilogueSeen, setEpilogueSeen] = useState(false)
   const selectedId = useConstellationStore(s => s.selectedId)
   const viewMode   = useConstellationStore(s => s.viewMode)
@@ -111,6 +127,10 @@ export default function App() {
     <>
       <CustomCursor />
       <DevNav scene={scene} setScene={setScene} />
+
+      <AnimatePresence>
+        {scene === 'loading' && <LoadingScreen key="loading" progress={progress} />}
+      </AnimatePresence>
 
       <AnimatePresence>
         {easterEgg && (
