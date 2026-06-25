@@ -17,7 +17,7 @@ export function useAmbientAudio() {
     // Defer Audio creation until first play — avoids 44MB network request on page load
     if (!audioRef.current) {
       const audio = new Audio(
-        import.meta.env.BASE_URL + 'audio/Anya%20Audio.mp4',
+        'https://res.cloudinary.com/df9cka4lv/video/upload/v1782336537/anya-bday/Anya_Audio.mp4',
       )
       audio.loop = true
       audio.volume = 0

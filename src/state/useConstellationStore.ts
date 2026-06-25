@@ -43,7 +43,7 @@ export const useConstellationStore = create<ConstellationStore>(set => ({
   setCameraZ: z => set({ cameraZ: z }),
 
   viewMode: 'map',
-  currentGalaxyId: 'the-date',
+  currentGalaxyId: 'vienna-1',
   hoveredGalaxyId: null,
   warpPhase: 'idle',
   warpTargetGalaxyId: null,

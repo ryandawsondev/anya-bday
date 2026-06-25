@@ -25,27 +25,46 @@ interface CarouselProps {
   onOpenLightbox: (idx: number) => void
 }
 
+function isVideo(url: string): boolean {
+  return url.includes('/video/upload/')
+}
+
 function PhotoCarousel({ photos, themeColor, onOpenLightbox }: CarouselProps) {
   const [idx, setIdx] = useState(0)
   const prev = () => setIdx(i => (i - 1 + photos.length) % photos.length)
   const next = () => setIdx(i => (i + 1) % photos.length)
+  const src = photos[idx]
 
   return (
     <div style={{ position: 'relative', overflow: 'hidden', borderRadius: '1.25rem 1.25rem 0 0' }}>
       <AnimatePresence mode="wait">
-        <motion.img
-          key={idx}
-          src={photos[idx]}
-          alt=""
-          initial={{ opacity: 0, scale: 1.04 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.97 }}
-          transition={{ duration: 0.35, ease: 'easeOut' }}
-          loading="lazy"
-          decoding="async"
-          onClick={() => onOpenLightbox(idx)}
-          style={{ width: '100%', height: '240px', objectFit: 'cover', display: 'block', cursor: 'zoom-in' }}
-        />
+        {isVideo(src) ? (
+          <motion.video
+            key={idx}
+            src={src}
+            controls
+            playsInline
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.35, ease: 'easeOut' }}
+            style={{ width: '100%', height: '240px', objectFit: 'cover', display: 'block', background: '#000' }}
+          />
+        ) : (
+          <motion.img
+            key={idx}
+            src={src}
+            alt=""
+            initial={{ opacity: 0, scale: 1.04 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.97 }}
+            transition={{ duration: 0.35, ease: 'easeOut' }}
+            loading="lazy"
+            decoding="async"
+            onClick={() => onOpenLightbox(idx)}
+            style={{ width: '100%', height: '240px', objectFit: 'cover', display: 'block', cursor: 'zoom-in' }}
+          />
+        )}
       </AnimatePresence>
 
       {photos.length > 1 && (
@@ -132,23 +151,43 @@ function Lightbox({ src, onClose }: LightboxProps) {
         cursor: 'zoom-out',
       }}
     >
-      <motion.img
-        src={src}
-        alt=""
-        initial={{ scale: 0.92, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0.92, opacity: 0 }}
-        transition={{ duration: 0.3, ease: 'easeOut' }}
-        onClick={e => e.stopPropagation()}
-        style={{
-          maxWidth: 'min(90vw, 900px)',
-          maxHeight: '85vh',
-          objectFit: 'contain',
-          borderRadius: '0.75rem',
-          boxShadow: '0 24px 80px rgba(0,0,0,0.8)',
-          cursor: 'default',
-        }}
-      />
+      {isVideo(src) ? (
+        <motion.video
+          src={src}
+          controls
+          playsInline
+          autoPlay
+          initial={{ scale: 0.92, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          exit={{ scale: 0.92, opacity: 0 }}
+          transition={{ duration: 0.3, ease: 'easeOut' }}
+          onClick={e => e.stopPropagation()}
+          style={{
+            maxWidth: 'min(90vw, 900px)',
+            maxHeight: '85vh',
+            borderRadius: '0.75rem',
+            boxShadow: '0 24px 80px rgba(0,0,0,0.8)',
+          }}
+        />
+      ) : (
+        <motion.img
+          src={src}
+          alt=""
+          initial={{ scale: 0.92, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          exit={{ scale: 0.92, opacity: 0 }}
+          transition={{ duration: 0.3, ease: 'easeOut' }}
+          onClick={e => e.stopPropagation()}
+          style={{
+            maxWidth: 'min(90vw, 900px)',
+            maxHeight: '85vh',
+            objectFit: 'contain',
+            borderRadius: '0.75rem',
+            boxShadow: '0 24px 80px rgba(0,0,0,0.8)',
+            cursor: 'default',
+          }}
+        />
+      )}
       <button
         onClick={onClose}
         style={{

@@ -1,8 +1,7 @@
 // Edit these sentences freely — each appears one at a time on screen.
 export const OPENING_MESSAGES: string[] = [
-  "Somewhere in the universe,",
-  "there are places built entirely from moments.",
-  "Moments only two people share.",
-  "I've been collecting ours.",
-  "Happy Birthday, Anya.",
+  'Some things are too big for words.',
+  'So I built you a universe instead.',
+  'Every star is something I never want to forget.',
+  'Happy Birthday, Babygirl.',
 ]

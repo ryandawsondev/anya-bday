@@ -17,7 +17,7 @@ import { useConstellationStore } from './state/useConstellationStore'
 import { useAmbientAudio } from './hooks/useAmbientAudio'
 import { useEasterEgg } from './hooks/useEasterEgg'
 
-const isPastBirthday = () => new Date() >= BIRTHDAY_DATE
+const isPastBirthday = () => import.meta.env.VITE_UNLOCK === 'true' || new Date() >= BIRTHDAY_DATE
 
 type Scene = 'countdown' | 'intro' | 'cinematic' | 'constellation' | 'epilogue'
 
